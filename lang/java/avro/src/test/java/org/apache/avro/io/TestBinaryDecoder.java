@@ -391,6 +391,22 @@ public class TestBinaryDecoder {
   }
 
   @Test(expected = UnsupportedOperationException.class)
+  public void testArrayMaxSize() throws IOException {
+    byte[] bad = new byte[10];
+    BinaryData.encodeLong(BinaryDecoder.MAX_ARRAY_SIZE + 1, bad, 0);
+    Decoder bd = factory.binaryDecoder(bad, null);
+    bd.readArrayStart();
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testMapMaxSize() throws IOException {
+    byte[] bad = new byte[10];
+    BinaryData.encodeLong(BinaryDecoder.MAX_ARRAY_SIZE + 1, bad, 0);
+    Decoder bd = factory.binaryDecoder(bad, null);
+    bd.readMapStart();
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
   public void testLongLengthEncoding() throws IOException {
     // Size equivalent to Integer.MAX_VALUE + 1
     byte[] bad = new byte[] { (byte) -128, (byte) -128, (byte) -128, (byte) -128, (byte) 16 };

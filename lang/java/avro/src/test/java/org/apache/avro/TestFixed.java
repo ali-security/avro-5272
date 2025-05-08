@@ -33,4 +33,25 @@ public class TestFixed {
     Assert.assertArrayEquals(new byte[16], (byte[]) field.defaultVal());
   }
 
+  @Test(expected = UnsupportedOperationException.class)
+  public void testFixedLengthOutOfLimit() {
+    try {
+      Schema.createFixed("oversize", "doc", "space", Integer.MAX_VALUE);
+      Assert.fail("Should have thrown UnsupportedOperationException");
+    } catch (UnsupportedOperationException e) {
+      Assert.assertEquals(TestSystemLimitException.ERROR_VM_LIMIT_BYTES, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = AvroRuntimeException.class)
+  public void testFixedNegativeLength() {
+    try {
+      Schema.createFixed("negative", "doc", "space", -1);
+      Assert.fail("Should have thrown AvroRuntimeException");
+    } catch (AvroRuntimeException e) {
+      Assert.assertEquals(TestSystemLimitException.ERROR_NEGATIVE, e.getMessage());
+      throw e;
+    }
+  }
 }

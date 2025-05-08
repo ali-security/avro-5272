@@ -23,6 +23,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 
+import org.apache.avro.SystemLimitException;
+import org.apache.avro.TestSystemLimitException;
 import org.junit.Test;
 
 public class TestUtf8 {
@@ -89,5 +91,33 @@ public class TestUtf8 {
     assertEquals(99162322, u.hashCode());
     u.setByteLength(4);
     assertEquals(3198781, u.hashCode());
+  }
+
+  @Test
+  public void testOversizeUtf8() {
+    Utf8 u = new Utf8();
+    u.setByteLength(1024);
+    assertEquals(1024, u.getByteLength());
+    try {
+      u.setByteLength(TestSystemLimitException.MAX_ARRAY_VM_LIMIT + 1);
+      throw new AssertionError("Should have thrown UnsupportedOperationException");
+    } catch (UnsupportedOperationException expected) {
+      // Expected exception
+    }
+
+    try {
+      System.setProperty(SystemLimitException.MAX_STRING_LENGTH_PROPERTY, Long.toString(1000L));
+      TestSystemLimitException.resetLimits();
+
+      try {
+        u.setByteLength(1024);
+        throw new AssertionError("Should have thrown SystemLimitException");
+      } catch (SystemLimitException e) {
+        assertEquals("String length 1024 exceeds maximum allowed", e.getMessage());
+      }
+    } finally {
+      System.clearProperty(SystemLimitException.MAX_STRING_LENGTH_PROPERTY);
+      TestSystemLimitException.resetLimits();
+    }
   }
 }
